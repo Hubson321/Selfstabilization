@@ -60,20 +60,19 @@ class DijkstraSelfStabilization {
                         printCurrentStates();
                         executor.shutdown();
                     }
-
-                    Thread.sleep(100);
                 }
-            } catch (InterruptedException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }).start();
     }
 
     static boolean checkStabilization() {
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        for (int i = 0; i < NUM_PROCESSES; i++) {
+            int previousState = processes[(i - 1 + N) % N].getState();
+            if (processes[i].getState() != previousState) {
+                return false;
+            }
         }
 
         return true;
@@ -97,13 +96,16 @@ class DijkstraSelfStabilization {
                     synchronized (token) {
                         if (id == 0 && previousState == processes[N - 1].getState()) {
                             state = (previousState + 1) % (N + 1);
-                            tokenHolder = id;  // Process 0 gets the token
+                            tokenHolder = id;
                             System.out.print("Process " + id + " updated state to " + state);
+//                            System.out.println("THREAD: " + Thread.currentThread().getId() + "TIME: " + System.currentTimeMillis());
                             printTokenHolder();
                         } else if (id != 0 && previousState != state) {
                             state = previousState;
                             tokenHolder = id;
                             System.out.print("Process " + id + " updated state to " + state);
+//                            System.out.println("THREAD: " + Thread.currentThread().getId() + "TIME: " + System.currentTimeMillis());
+
                             printTokenHolder();
                         }
                     }
